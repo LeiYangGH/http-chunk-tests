@@ -20,10 +20,12 @@ import rx.apache.http.ObservableHttp;
 
 public class App {
 
+  private static String url = "http://127.0.0.1:8080";
+
+  //private static String url = "http://10.71.20.181:8080";
   private static void useApacheHc() throws IOException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
-//    HttpGet httpGet = new HttpGet("http://127.0.0.1:8080");
-    HttpGet httpGet = new HttpGet("http://10.71.20.181:8080");
+    HttpGet httpGet = new HttpGet(url);
     CloseableHttpResponse response = httpclient.execute(httpGet);
     try {
       HttpEntity responseEntity = response.getEntity();
@@ -58,7 +60,7 @@ public class App {
   private static void useJavaHttpClient() throws IOException, InterruptedException {
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
-        .uri(URI.create("http://10.71.20.181:8080"))
+        .uri(URI.create(url))
         .build();
 
     HttpResponse<String> response = client.send(request,
@@ -70,13 +72,12 @@ public class App {
   private static void useRxApacheHttp() throws IOException, InterruptedException {
     CloseableHttpAsyncClient httpClient = HttpAsyncClients.createDefault();
     httpClient.start();
-
     ObservableHttp
-        .createRequest(HttpAsyncMethods.createGet("http://10.71.20.181:8080"), httpClient)
+        .createRequest(HttpAsyncMethods.createGet(url), httpClient)
         .toObservable()
-        .flatMap(response ->
-            response.getContent().map(bb -> new String(bb))
-        )
+//        .flatMap(response ->
+//            response.getContent().map(bb -> bb.length)
+//        )
         .forEach(resp ->
             // this will be invoked for each event
             System.out.println(resp)
@@ -84,8 +85,8 @@ public class App {
   }
 
   public static void main(String[] args) throws IOException, InterruptedException {
-//    useApacheHc();
+    useApacheHc();
 //    useJavaHttpClient();
-    useRxApacheHttp();
+//    useRxApacheHttp();
   }
 }
