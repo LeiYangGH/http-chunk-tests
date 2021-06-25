@@ -11,9 +11,10 @@ import org.apache.http.impl.client.HttpClients;
 
 public class App {
 
-  public static void main(String[] args) throws IOException {
+  private static void useApacheHc() throws IOException {
     CloseableHttpClient httpclient = HttpClients.createDefault();
-    HttpGet httpGet = new HttpGet("http://127.0.0.1:8080");
+//    HttpGet httpGet = new HttpGet("http://127.0.0.1:8080");
+    HttpGet httpGet = new HttpGet("http://10.71.20.181:8080");
     CloseableHttpResponse response = httpclient.execute(httpGet);
     try {
       HttpEntity responseEntity = response.getEntity();
@@ -43,5 +44,10 @@ public class App {
     } finally {
       response.close();
     }
+  }
+
+
+  public static void main(String[] args) throws IOException {
+    useApacheHc();
   }
 }
