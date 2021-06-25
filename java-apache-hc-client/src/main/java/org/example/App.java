@@ -3,11 +3,20 @@ package org.example;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.nio.client.methods.HttpAsyncMethods;
+import rx.apache.http.ObservableHttpResponse;
+import rx.apache.http.ObservableHttp;
 
 public class App {
 
@@ -46,8 +55,37 @@ public class App {
     }
   }
 
+  private static void useJavaHttpClient() throws IOException, InterruptedException {
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+        .uri(URI.create("http://10.71.20.181:8080"))
+        .build();
 
-  public static void main(String[] args) throws IOException {
-    useApacheHc();
+    HttpResponse<String> response = client.send(request,
+        HttpResponse.BodyHandlers.ofString());
+
+    System.out.println(response.body());
+  }
+
+  private static void useRxApacheHttp() throws IOException, InterruptedException {
+    CloseableHttpAsyncClient httpClient = HttpAsyncClients.createDefault();
+    httpClient.start();
+
+    ObservableHttp
+        .createRequest(HttpAsyncMethods.createGet("http://10.71.20.181:8080"), httpClient)
+        .toObservable()
+        .flatMap(response ->
+            response.getContent().map(bb -> new String(bb))
+        )
+        .forEach(resp ->
+            // this will be invoked for each event
+            System.out.println(resp)
+        );
+  }
+
+  public static void main(String[] args) throws IOException, InterruptedException {
+//    useApacheHc();
+//    useJavaHttpClient();
+    useRxApacheHttp();
   }
 }
